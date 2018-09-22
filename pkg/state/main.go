@@ -17,7 +17,7 @@ type State struct {
 type User struct {
 	ID       int
 	Username string
-	Data     UserData
+	Stage    string // stage the user is at "context"
 }
 
 // UserData is a key value store for embedding data
@@ -34,7 +34,7 @@ func NewClient(path string) (*State, error) {
 	db, err := sql.Open("sqlite3", path)
 
 	if isInit {
-		initStmt := `create table users (id integer not null primary key autoincrement, username text);`
+		initStmt := `create table users (id integer not null primary key, username text, stage text);`
 
 		_, err = db.Exec(initStmt)
 		if err != nil {
@@ -48,15 +48,31 @@ func NewClient(path string) (*State, error) {
 	return &state, err
 }
 
-// GetUserByUsername finds a user by their username
+// GetUserByUsername gets a user by their Username. DEPRECATED.
 func (s *State) GetUserByUsername(username string) (*User, error) {
-	stmt, err := s.DB.Prepare("select id, username from users where username = ?")
+	stmt, err := s.DB.Prepare("select id, username, stage from users where username = ?")
 	if err != nil {
 		return nil, err
 	}
 
 	var user User
-	err = stmt.QueryRow(username).Scan(&user.ID, &user.Username)
+	err = stmt.QueryRow(username).Scan(&user.ID, &user.Username, &user.Stage)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+// GetUserByID gets a user by their ID
+func (s *State) GetUserByID(id int) (*User, error) {
+	stmt, err := s.DB.Prepare("select id, username, stage from users where id = ?")
+	if err != nil {
+		return nil, err
+	}
+
+	var user User
+	err = stmt.QueryRow(id).Scan(&user.ID, &user.Username, &user.Stage)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +82,7 @@ func (s *State) GetUserByUsername(username string) (*User, error) {
 
 // ListUsers returns a list of ALLLLL the users.
 func (s *State) ListUsers() ([]User, error) {
-	rows, err := s.DB.Query("select id, username from users")
+	rows, err := s.DB.Query("select id, username, stage from users")
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +93,7 @@ func (s *State) ListUsers() ([]User, error) {
 	defer rows.Close()
 	for rows.Next() {
 		var user User
-		err = rows.Scan(&user.ID, &user.Username)
+		err = rows.Scan(&user.ID, &user.Username, &user.Stage)
 
 		if err != nil {
 			return nil, nil
@@ -95,22 +111,20 @@ func (s *State) ListUsers() ([]User, error) {
 }
 
 // CreateUser creates a user.
-func (s *State) CreateUser(username string) (*User, error) {
+func (s *State) CreateUser(id int, username string) (*User, error) {
 	tx, err := s.DB.Begin()
 	if err != nil {
 		return nil, err
 	}
 
-	stmt, err := tx.Prepare("insert into users(id, username) values(null, ?)")
+	stmt, err := tx.Prepare("insert into users(id, username, stage) values(?, ?, \"init\")")
 	if err != nil {
 		return nil, err
 	}
 
-	log.Print("inserted")
-
 	defer stmt.Close()
 
-	_, err = stmt.Exec(username)
+	_, err = stmt.Exec(id, username)
 	if err != nil {
 		log.Fatal(err)
 	}

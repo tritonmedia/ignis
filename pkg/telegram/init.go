@@ -42,8 +42,9 @@ func NewListener(config *config.Config) error {
 		log.Print("failed to list users")
 	} else {
 		log.Print("list of current (known) users:")
+		fmt.Println("ID\t Username\t Stage")
 		for _, user := range users {
-			fmt.Println(user.ID, "\t", user.Username)
+			fmt.Println(user.ID, "\t", user.Username, "\t", user.Stage)
 		}
 	}
 
@@ -53,12 +54,18 @@ func NewListener(config *config.Config) error {
 		}
 
 		username := update.Message.From.UserName
+		if username == "" {
+			log.Printf("[state] no username, using calculated firstname + lastname")
+			username = update.Message.From.FirstName + " " + update.Message.From.LastName
+		}
 
-		log.Printf("[state] attempting to find user: %s", username)
-		user, err := s.GetUserByUsername(username)
+		id := update.Message.From.ID
+
+		log.Printf("[state] attempting to find user: %s (uid: %d)", username, id)
+		user, err := s.GetUserByID(id)
 		if s.IsNotFound(err) {
-			log.Printf("[state] creating user: %s", username)
-			_, err := s.CreateUser(username)
+			log.Printf("[state] creating user: %s (uid: %d)", username, id)
+			_, err := s.CreateUser(id, username)
 			if err != nil {
 				log.Printf("[state] WARN: failed to create user: %s (err: %s)", username, err.Error())
 			}
@@ -69,9 +76,10 @@ func NewListener(config *config.Config) error {
 			log.Printf("[state] found user: %s (uid: %d)", username, user.ID)
 		}
 
-		//msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
-		//msg.ReplyToMessageID = update.Message.MessageID
-		//bot.Send(msg)
+		err = processMessage(update.Message, s, user)
+		if err != nil {
+			log.Printf("[processor] ERR: failed to respond to %s", update.Message.Text)
+		}
 	}
 
 	return nil
