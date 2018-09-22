@@ -35,6 +35,9 @@ func NewListener(config *config.Config) error {
 
 	stateFile := filepath.Join(wd, "ignis.db")
 
+	functionTable = make(map[string]fn)
+	register()
+
 	s, err := state.NewClient(stateFile)
 
 	users, err := s.ListUsers()
@@ -76,10 +79,13 @@ func NewListener(config *config.Config) error {
 			log.Printf("[state] found user: %s (uid: %d)", username, user.ID)
 		}
 
-		err = processMessage(update.Message, s, user)
+		resp, err := processMessage(update.Message, s, user)
 		if err != nil {
-			log.Printf("[processor] ERR: failed to respond to %s", update.Message.Text)
+			log.Printf("[processor] ERR: failed to respond to %s (err: %s)", update.Message.Text, err.Error())
+			continue
 		}
+
+		bot.Send(resp)
 	}
 
 	return nil

@@ -10,6 +10,14 @@
   version = "v1.9.0"
 
 [[projects]]
+  digest = "1:808cdddf087fb64baeae67b8dfaee2069034d9704923a3cb8bd96a995421a625"
+  name = "github.com/patrickmn/go-cache"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "a3647f8e31d79543b2d0f0ae2fe5c379d72cedc0"
+  version = "v2.1.0"
+
+[[projects]]
   digest = "1:420817f94b6c172dabb8a054d0b2d257d7437a87c7c8c7ee432bc008a577fc46"
   name = "github.com/technoweenie/multipartstreamer"
   packages = ["."]
@@ -46,6 +54,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/mattn/go-sqlite3",
+    "github.com/patrickmn/go-cache",
     "github.com/urfave/cli",
     "gopkg.in/telegram-bot-api.v4",
     "gopkg.in/yaml.v2",

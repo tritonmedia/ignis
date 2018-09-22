@@ -4,8 +4,11 @@ import (
 	"database/sql"
 	"log"
 	"os"
+	"time"
 
+	// used for sqlite driver
 	_ "github.com/mattn/go-sqlite3"
+	cache "github.com/patrickmn/go-cache"
 )
 
 // State is the interface to the state object
@@ -23,6 +26,10 @@ type User struct {
 // UserData is a key value store for embedding data
 // that can be checked by an application later
 type UserData map[string]interface{}
+
+// stageUserLookup tracks pointers to "instances" of the cache objects
+// that are used for each user's stage data.
+var stageUserLookup map[int]map[string]*cache.Cache
 
 // NewClient creates a new client for accessing the state.
 func NewClient(path string) (*State, error) {
@@ -145,4 +152,35 @@ func (s *State) IsNotFound(err error) bool {
 	}
 
 	return false
+}
+
+// NewStageStorage creates a state storage interface that supports creating a new one,
+// or using an already existing one
+func NewStageStorage(u *User, stage string) *cache.Cache {
+	if len(stageUserLookup) == 0 {
+		log.Println("[store/stage] DEBU: initialized the first stage memory object")
+
+		// initialize the lookup table, tracks instances of the cache object
+		stageUserLookup = make(map[int]map[string]*cache.Cache)
+	}
+
+	// if not set, create the user table
+	if _, ok := stageUserLookup[u.ID]; !ok {
+		log.Printf("[store/stage] DEBU: initalized a fresh in-mem stage map for user: %s (uid: %d)", u.Username, u.ID)
+		stageUserLookup[u.ID] = make(map[string]*cache.Cache)
+	}
+
+	// check if we have a cache object already created, get it's pointer
+	if c, ok := stageUserLookup[u.ID][stage]; ok {
+		if c != nil {
+			log.Printf("[store/stage] DEBU: using exisiting stage cache object for user: %s (uid: %d)", u.Username, u.ID)
+
+			return c
+		}
+	}
+
+	// if we're here, we don't have one, create a new cache object and return it, storing it for later.
+	log.Printf("[store/stage] DEBU: creating new cache object for user: %s (uid: %d)", u.Username, u.ID)
+	stageUserLookup[u.ID][stage] = cache.New(5*time.Minute, 10*time.Minute)
+	return stageUserLookup[u.ID][stage]
 }
