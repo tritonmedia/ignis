@@ -1,0 +1,5 @@
+bin
+vendor
+_dist
+config/config.yaml
+ignis.db
