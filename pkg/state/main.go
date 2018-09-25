@@ -133,7 +133,7 @@ func (s *State) CreateUser(id int, username string) (*User, error) {
 
 	_, err = stmt.Exec(id, username)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	err = tx.Commit()
@@ -143,6 +143,29 @@ func (s *State) CreateUser(id int, username string) (*User, error) {
 
 	user, err := s.GetUserByUsername(username)
 	return user, err
+}
+
+// SetStage sets the stage a user is at
+func (s *State) SetStage(id int, stage string) error {
+	tx, err := s.DB.Begin()
+	if err != nil {
+		return err
+	}
+
+	stmt, err := tx.Prepare("update users set stage = ? where id = ? ")
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	_, err = stmt.Exec(stage, id)
+	if err != nil {
+		return err
+	}
+
+	err = tx.Commit()
+	return err
 }
 
 // IsNotFound checks if the error type is a "not found" error type.

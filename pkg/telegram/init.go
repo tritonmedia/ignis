@@ -68,7 +68,7 @@ func NewListener(config *config.Config) error {
 		user, err := s.GetUserByID(id)
 		if s.IsNotFound(err) {
 			log.Printf("[state] creating user: %s (uid: %d)", username, id)
-			_, err := s.CreateUser(id, username)
+			user, err = s.CreateUser(id, username)
 			if err != nil {
 				log.Printf("[state] WARN: failed to create user: %s (err: %s)", username, err.Error())
 			}
@@ -79,13 +79,23 @@ func NewListener(config *config.Config) error {
 			log.Printf("[state] found user: %s (uid: %d)", username, user.ID)
 		}
 
+		log.Printf("[processor] going to run stage: %s (un: %s, uid: %d)", user.Stage, user.Username, user.ID)
+
 		resp, err := processMessage(update.Message, s, user)
 		if err != nil {
 			log.Printf("[processor] ERR: failed to respond to %s (err: %s)", update.Message.Text, err.Error())
+
+			m := tgbotapi.NewMessage(update.Message.Chat.ID, "I'm sorry, but I ran into an issue processing this message. Please try again later!")
+			m.ReplyToMessageID = update.Message.MessageID
+
+			bot.Send(m)
 			continue
 		}
 
-		bot.Send(resp)
+		_, err = bot.Send(resp)
+		if err != nil {
+			log.Printf("[send] ERR: failed to send response (err: %s)", err.Error())
+		}
 	}
 
 	return nil
