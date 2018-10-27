@@ -179,7 +179,9 @@ func (s *State) IsNotFound(err error) bool {
 
 // NewStageStorage creates a state storage interface that supports creating a new one,
 // or using an already existing one
-func NewStageStorage(u *User, stage string) *cache.Cache {
+func NewStageStorage(u *User) *cache.Cache {
+	stage := "default"
+
 	if len(stageUserLookup) == 0 {
 		log.Println("[store/stage] DEBU: initialized the first stage memory object")
 

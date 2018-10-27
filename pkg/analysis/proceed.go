@@ -2,6 +2,7 @@ package analysis
 
 import (
 	"log"
+	"strings"
 )
 
 // ProceedAnalysis checks if we can proceed based on the results of the word used.
@@ -18,7 +19,7 @@ func ProceedAnalysis(msg string) bool {
 
 	scores := make([]bool, len(tokens))
 	for i, token := range tokens {
-		w := token.Text
+		w := strings.ToLower(token.Text)
 		scores[i] = model["proceed"][w]
 	}
 

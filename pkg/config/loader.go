@@ -13,7 +13,9 @@ type Config struct {
 		Token string `yaml:"token"`
 	} `yaml:"telegram"`
 	Trello struct {
-		Token string `yaml:"token"`
+		AppKey string `yaml:"appKey"`
+		IDList string `yaml:"list"`
+		Token  string `yaml:"token"`
 	} `yaml:"trello"`
 }
 

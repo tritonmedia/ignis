@@ -1,7 +1,6 @@
 package telegram
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -18,7 +17,7 @@ func NewListener(config *config.Config) error {
 		return err
 	}
 
-	log.Printf("Authorized on account %s", bot.Self.UserName)
+	log.Printf("[telegram/init] Authorized on account %s", bot.Self.UserName)
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
@@ -44,10 +43,9 @@ func NewListener(config *config.Config) error {
 	if err != nil {
 		log.Print("failed to list users")
 	} else {
-		log.Print("list of current (known) users:")
-		fmt.Println("ID\t Username\t Stage")
 		for _, user := range users {
-			fmt.Println(user.ID, "\t", user.Username, "\t", user.Stage)
+			s.SetStage(user.ID, "init")
+			log.Printf("[telegram/init] reset stage: oldStage=%s,stage=init,username=%s,uid=%d", user.Stage, user.Username, user.ID)
 		}
 	}
 
@@ -80,6 +78,8 @@ func NewListener(config *config.Config) error {
 		}
 
 		log.Printf("[processor] going to run stage: %s (un: %s, uid: %d)", user.Stage, user.Username, user.ID)
+
+		log.Printf("[processor] DEBU: message: '%s'", update.Message.Text)
 
 		resp, err := processMessage(update.Message, s, user)
 		if err != nil {

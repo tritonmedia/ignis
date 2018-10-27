@@ -19,7 +19,7 @@ var functionTable map[string]fn
 // processMessage runs an action when a message is recieved
 func processMessage(msg *tgbotapi.Message, s *state.State, u *state.User) (*tgbotapi.MessageConfig, error) {
 	if fn, ok := functionTable[u.Stage]; ok {
-		stage := state.NewStageStorage(u, u.Stage)
+		stage := state.NewStageStorage(u)
 
 		resp, err := fn(msg, u, stage, s)
 		if err != nil {
