@@ -1,12 +1,18 @@
 package telegram
 
 import (
-	"strings"
-
 	cache "github.com/patrickmn/go-cache"
+	"github.com/tritonmedia/ignis/pkg/analysis"
 	"github.com/tritonmedia/ignis/pkg/state"
 	"gopkg.in/telegram-bot-api.v4"
 )
+
+// canProceed determines if we have a positive go-ahead or negative go-ahead
+func canProceed(msg string) bool {
+	a := analysis.ProceedAnalysis(msg)
+
+	return a
+}
 
 // stageInit is run when a user firsts contacts the bot, or doesn't have a current stage (context)
 func stageInit(msg *tgbotapi.Message, u *state.User, c *cache.Cache, s *state.State) (string, error) {
@@ -37,8 +43,8 @@ Reply with 'cancel' to cancel, or 'yes' to continue
 
 // createMediaConfirm processes the create media response
 func createMediaConfirm(msg *tgbotapi.Message, u *state.User, c *cache.Cache, s *state.State) (string, error) {
-	if strings.ToLower(msg.Text) == "cancel" {
-		s.SetStage(u.ID, "create-media")
+	if !canProceed(msg.Text) {
+		s.SetStage(u.ID, "init")
 		return "OK, let's try again.", nil
 	}
 
@@ -55,7 +61,7 @@ If so, reply with 'yes', or 'no' if you don't.
 func sourcePrecheck(msg *tgbotapi.Message, u *state.User, c *cache.Cache, s *state.State) (string, error) {
 	s.SetStage(u.ID, "init")
 
-	if strings.ToLower(msg.Text) != "yes" {
+	if !canProceed(msg.Text) {
 		return `OK! I've went ahead and created the request. Here is it's link: <link>`, nil
 	}
 

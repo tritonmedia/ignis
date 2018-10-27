@@ -2,12 +2,36 @@
 
 
 [[projects]]
+  digest = "1:e47d51dab652d26c3fba6f8cba403f922d02757a82abdc77e90df7948daf296e"
+  name = "github.com/deckarep/golang-set"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "cbaa98ba5575e67703b32b4b19f73c91f3c4159e"
+  version = "v1.7.1"
+
+[[projects]]
   digest = "1:3cafc6a5a1b8269605d9df4c6956d43d8011fc57f266ca6b9d04da6c09dee548"
   name = "github.com/mattn/go-sqlite3"
   packages = ["."]
   pruneopts = "UT"
   revision = "25ecb14adfc7543176f7d85291ec7dba82c6f7e4"
   version = "v1.9.0"
+
+[[projects]]
+  digest = "1:b3126a5e167f640c5943eb641489baec30bbbb995a9741b905d7c05239412d4b"
+  name = "github.com/mingrammer/commonregex"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "6565f25cf48f171541d423805a62917ea02f7d65"
+  version = "v1.0.0"
+
+[[projects]]
+  digest = "1:246ab598a22ea9d50f46e65f655f78161a19822f6597268b02f04af998684807"
+  name = "github.com/montanaflynn/stats"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "1bf9dbcd8cbe1fdb75add3785b1d4a9a646269ab"
+  version = "0.3.0"
 
 [[projects]]
   digest = "1:808cdddf087fb64baeae67b8dfaee2069034d9704923a3cb8bd96a995421a625"
@@ -34,6 +58,46 @@
   version = "v1.20.0"
 
 [[projects]]
+  branch = "master"
+  digest = "1:8f66ea9958dac24553f18bd9cd849bceedd0a4b7f94222d61dd09048cafc6775"
+  name = "gonum.org/v1/gonum"
+  packages = [
+    "blas",
+    "blas/blas64",
+    "blas/gonum",
+    "floats",
+    "internal/asm/c128",
+    "internal/asm/f32",
+    "internal/asm/f64",
+    "internal/math32",
+    "lapack",
+    "lapack/gonum",
+    "lapack/lapack64",
+    "mat",
+  ]
+  pruneopts = "UT"
+  revision = "acd85591b9169151f6e550ceff8c2931f55b08a7"
+
+[[projects]]
+  branch = "v2"
+  digest = "1:ff398a1169e0ad11c0537c341fcbc9b4be7e34143886b34352ff1005d45b3ab4"
+  name = "gopkg.in/jdkato/prose.v2"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "767a23049b9e59ef675496a9406a1e456bc5ad6e"
+
+[[projects]]
+  digest = "1:cbe1bd3b7c4ebad5579abdf9125907892c1bdf2faf40549d8f8ad6e1ce015e42"
+  name = "gopkg.in/neurosnap/sentences.v1"
+  packages = [
+    ".",
+    "data",
+  ]
+  pruneopts = "UT"
+  revision = "a7f18ead1433a139742a8b42ce7a059cfb484d60"
+  version = "v1.0.6"
+
+[[projects]]
   digest = "1:6999e4e34bb73184674e844d6d1e6f48f75a30a9c86ef7663dbc7b2509962812"
   name = "gopkg.in/telegram-bot-api.v4"
   packages = ["."]
@@ -56,6 +120,7 @@
     "github.com/mattn/go-sqlite3",
     "github.com/patrickmn/go-cache",
     "github.com/urfave/cli",
+    "gopkg.in/jdkato/prose.v2",
     "gopkg.in/telegram-bot-api.v4",
     "gopkg.in/yaml.v2",
   ]

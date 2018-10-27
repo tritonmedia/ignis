@@ -27,7 +27,7 @@ lint:
 .PHONY: build
 build: lint
 	@echo " ===> building releases in ./bin/... <=== "
-	GOBIN=$(BINDIR) $(GO) install $(GOFLAGS) -compiler gccgo -gccgoflags '$(GCCGOGLAGS)' -tags '$(TAGS)' -ldflags '$(LDFLAGS)' github.com/tritonmedia/ignis/...
+	GOBIN=$(BINDIR) $(GO) install $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' github.com/tritonmedia/ignis/...
 
 .PHONY: release
 release: lint build

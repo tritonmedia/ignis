@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/tritonmedia/ignis/pkg/analysis"
 	"github.com/tritonmedia/ignis/pkg/config"
 	"github.com/tritonmedia/ignis/pkg/telegram"
 	"github.com/urfave/cli"
@@ -20,6 +21,12 @@ func main() {
 		d, err := os.Getwd()
 		if err != nil {
 			return err
+		}
+
+		err = analysis.Train()
+		if err != nil {
+			log.Printf("[main/analysis:train] failed to train model")
+			os.Exit(1)
 		}
 
 		config, err := config.Load(filepath.Join(d, "config/config.yaml"))

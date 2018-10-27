@@ -44,7 +44,7 @@ func processMessage(msg *tgbotapi.Message, s *state.State, u *state.User) (*tgbo
 }
 
 func registerFunc(f fn, stageName string) error {
-	log.Printf("registering stage: %s", stageName)
+	log.Printf("[telegram/processor:register] registering stage: %s", stageName)
 	functionTable[stageName] = f
 
 	return nil
