@@ -12,4 +12,7 @@ type Message interface {
 
 	// GetID returns the current chat id, use with Send()
 	GetID() string
+
+	// Text is the textual representation of the message
+	Text() string
 }

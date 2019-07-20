@@ -19,10 +19,9 @@ type Stage struct {
 }
 
 // StageFunc is a function used for a stage
-type StageFunc func(*Scene) (string, error)
+type StageFunc func(*Scene) error
 
 // StageTransitionFunc is a func used for Leave/Enter events.
-// It cannot return contents for a messed
 type StageTransitionFunc func(*Scene) error
 
 // NewStage returns a stage instance that is able to be used in a stage

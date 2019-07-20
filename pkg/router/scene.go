@@ -2,6 +2,7 @@ package router
 
 import (
 	"fmt"
+	"runtime"
 	"time"
 
 	cache "github.com/patrickmn/go-cache"
@@ -24,8 +25,11 @@ type Scene struct {
 	// EntryPoint is the initial stage, evaluated to the be the first provided to Add()
 	EntryPoint string
 
-	// StageData holds data for a stage
-	StageData map[string]*cache.Cache
+	// Cache is the cache for this scene, used for storing data between stages
+	Cache *cache.Cache
+
+	// Finished, is this scene finished?
+	Finished bool
 }
 
 // NewScene creates a Telegram scene
@@ -40,56 +44,57 @@ func (s *Scene) Add(st *Stage) {
 	// if this is nil, then initialize it
 	if s.Stages == nil {
 		s.Stages = make(map[string]*Stage)
-		s.StageData = make(map[string]*cache.Cache)
 		s.EntryPoint = st.Name
 	}
 
 	s.Stages[st.Name] = st
-	s.StageData[st.Name] = cache.New(cache.NoExpiration, 10*time.Minute)
+	s.Cache = cache.New(cache.NoExpiration, 10*time.Minute)
 }
 
-// GetCache returns a cache object for a stage
-func (s *Scene) GetCache(stageName string) (*cache.Cache, error) {
-	// use the current stage, if we have one, and one wasn't provided
-	if s.CurrentStage != "" && stageName == "" {
-		stageName = s.CurrentStage
-	}
+// Reset resets a stage to the initial entrypoint
+func (s *Scene) Reset() {
+	s.CurrentStage = s.EntryPoint
+	s.Cache = cache.New(cache.NoExpiration, 10*time.Minute)
 
-	if c, ok := s.StageData[stageName]; ok {
-		return c, nil
-	}
-
-	// if we're here, then we haven't found a cache and since Add() creates
-	// these for us we can assume that it doesn't exist/isn't a valid stage.
-	return nil, fmt.Errorf("failed to find a cache for stage '%s', does it exist?", stageName)
+	// TODO(jaredallard): investigate impact of running GC
+	// trigger GC to cleanup old caches
+	runtime.GC()
 }
 
-// Enter enters a scene, calling OnLeave on the existing stage
+// Enter is meant to be used by a stage function to
+// TODO(jaredallard): decide if we want to return an error here if stage doesn't exist
+func (s *Scene) Enter(stage string) {
+	s.CurrentStage = stage
+}
+
+// Next enters a scene, calling OnLeave on the existing stage
 // and calling OnEnter on the new one, then calling the function
-func (s *Scene) Enter(stage string, m Message) (string, error) {
-	// if stage is empty & no current stage, assume we're starting
-	if stage == "" && s.CurrentStage == "" {
+func (s *Scene) Next(m Message) error {
+	// if current stage is empty, then assume we're going to the entrypoint
+	stage := s.CurrentStage
+	if s.CurrentStage == "" {
 		stage = s.EntryPoint
-	} else if stage == "" && s.CurrentStage != "" {
-		// if we have no stage, but we're on a stage then it's a runtime error to
-		// try to assume the entrypoint
-		return "", fmt.Errorf("missing argument to Enter()")
 	}
+
+	// update the message we're processing, this allows OnLeave()
+	// to process the next message before the next stage gets it
+	s.Message = m
 
 	// if we have a current stage, execute leave on it
 	if s.CurrentStage != "" {
 		s.Stages[s.CurrentStage].OnLeave(s)
 	}
 
-	// update the message we're processing
-	s.Message = m
-
 	if st, ok := s.Stages[stage]; ok {
 		st.OnEnter(s)
-		r, err := st.Func(s)
-		return r, err
+		return st.Func(s)
 	}
 
 	// stage doesn't exist
-	return "", fmt.Errorf("stage '%s' not found", stage)
+	return fmt.Errorf("stage '%s' not found", stage)
+}
+
+// Done marks a scene as finished
+func (s *Scene) Done() {
+	s.Finished = true
 }

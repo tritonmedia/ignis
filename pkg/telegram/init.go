@@ -1,6 +1,7 @@
 package telegram
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -13,7 +14,6 @@ import (
 
 // NewListener starts a new listener.
 func NewListener(config *config.Config) error {
-	userScenes = make(map[string]map[int]*router.Scene)
 	bot, err := tgbotapi.NewBotAPI(config.Telegram.Token)
 	if err != nil {
 		return err
@@ -36,9 +36,6 @@ func NewListener(config *config.Config) error {
 
 	stateFile := filepath.Join(wd, "ignis.db")
 
-	functionTable = make(map[string]fn)
-	register()
-
 	s, err := state.NewClient(stateFile)
 
 	users, err := s.ListUsers()
@@ -50,6 +47,11 @@ func NewListener(config *config.Config) error {
 			log.Printf("[telegram/init] reset stage: oldStage=%s,stage=init,username=%s,uid=%d", user.Stage, user.Username, user.ID)
 		}
 	}
+
+	// create a command router
+	c := router.NewCommandRouter()
+	c.AddScene("new", newNewScene)
+	c.AddScene("start", newStartScene)
 
 	for update := range updates {
 		if update.Message == nil {
@@ -79,15 +81,13 @@ func NewListener(config *config.Config) error {
 			log.Printf("[state] found user: %s (uid: %d)", username, user.ID)
 		}
 
-		log.Printf("[processor] going to run stage: %s (un: %s, uid: %d)", user.Stage, user.Username, user.ID)
-
 		log.Printf("[processor] DEBU: message: '%s'", update.Message.Text)
 
-		_, err = processMessage(update.Message, user, bot)
+		err = c.Process(update.Message.Command(), NewTelegramMessage(update.Message, user, bot))
 		if err != nil {
 			log.Printf("[processor] ERR: failed to respond to %s (err: %s)", update.Message.Text, err.Error())
 
-			m := tgbotapi.NewMessage(update.Message.Chat.ID, "I'm sorry, but I ran into an issue processing this message. Please try again later!")
+			m := tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("Failed to process message: %v", err))
 			m.ReplyToMessageID = update.Message.MessageID
 
 			bot.Send(m)

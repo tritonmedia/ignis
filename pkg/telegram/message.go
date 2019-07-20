@@ -7,18 +7,9 @@ import (
 	"strconv"
 	"text/template"
 
-	cache "github.com/patrickmn/go-cache"
-	router "github.com/tritonmedia/ignis/pkg/router"
 	"github.com/tritonmedia/ignis/pkg/state"
 	tgbotapi "gopkg.in/telegram-bot-api.v4"
 )
-
-// fn is a function table function, should take the message and a user as the input
-type fn func(*tgbotapi.Message, *state.User, *cache.Cache, *state.State) (string, error)
-
-var functionTable map[string]fn
-
-var userScenes map[string]map[int]*router.Scene
 
 // TelegramMessage is a router.Message compatible Telegram provider
 type TelegramMessage struct {
@@ -65,7 +56,7 @@ func (t *TelegramMessage) Send(text, ID string) error {
 	m := tgbotapi.NewMessage(int64(i), tpl.String())
 	m.ParseMode = "Markdown"
 
-	log.Printf("[emulate] Send(%s, %s)", tpl.String(), ID)
+	log.Printf("[telegram/message] Send(<stripped>, %s)", ID)
 
 	_, err = t.Bot.Send(m)
 	return err
@@ -76,29 +67,7 @@ func (t *TelegramMessage) GetID() string {
 	return strconv.Itoa(int(t.Message.Chat.ID))
 }
 
-// processMessage runs an action when a message is recieved
-func processMessage(msg *tgbotapi.Message, u *state.User, bot *tgbotapi.BotAPI) (*tgbotapi.MessageConfig, error) {
-	// TODO(jaredallard): scope this to allow stages to be set for each
-	if _, ok := userScenes["new"]; !ok {
-		userScenes["new"] = make(map[int]*router.Scene)
-	}
-
-	if _, ok := userScenes["new"][u.ID]; !ok {
-		log.Printf("[telegram/processMessage] creating scene for user %d", u.ID)
-		userScenes["new"][u.ID] = newNewStage()
-	}
-
-	if msg.Command() == "new" {
-		_, err := userScenes["new"][u.ID].Enter("", NewTelegramMessage(msg, u, bot))
-		return nil, err
-	}
-
-	return nil, fmt.Errorf("Unrecognized command '%s'", msg.Command())
-}
-
-func registerFunc(f fn, stageName string) error {
-	log.Printf("[telegram/processor:register] registering stage: %s", stageName)
-	functionTable[stageName] = f
-
-	return nil
+// Text returns the text of the message
+func (t *TelegramMessage) Text() string {
+	return t.Message.Text
 }

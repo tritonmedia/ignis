@@ -18,35 +18,6 @@ func canProceed(msg string) bool {
 	return a
 }
 
-// stageInit is run when a user firsts contacts the bot, or doesn't have a current stage (context)
-func stageInit(msg *tgbotapi.Message, u *state.User, c *cache.Cache, s *state.State) (string, error) {
-	s.SetStage(u.ID, "create-media")
-
-	return `
-Hello, [@{{.User.Username}}](tg://user?id={{.User.ID}})!
-
-You can talk to me to interface with the Triton Media platform (https://github.com/tritonmedia/triton).
-
-Here are the various commands I support:
-	
-	/new - create a new media
-	/list [status] - list all media that is currently on the server
-	`, nil
-}
-
-// createMedia will set the create media
-func createMedia(msg *tgbotapi.Message, u *state.User, c *cache.Cache, s *state.State) (string, error) {
-	s.SetStage(u.ID, "is-movie")
-
-	c.Set("media:title", msg.Text, time.Hour)
-
-	return `
-You want to request media called "{{.Message.Text}}", correct?
-
-Reply with 'cancel' to cancel, or 'yes' to continue
-	`, nil
-}
-
 // createMediaConfirm processes the create media response
 func createMediaConfirm(msg *tgbotapi.Message, u *state.User, c *cache.Cache, s *state.State) (string, error) {
 	isMovie := false
@@ -62,20 +33,6 @@ func createMediaConfirm(msg *tgbotapi.Message, u *state.User, c *cache.Cache, s 
 OK! I'll create a request for this media for you. Do you have a link to a source for this?
 
 If so, reply with 'yes', or 'no' if you don't.
-	`, nil
-}
-
-// isMovie asks the user if we're a movie or not, and processes the createMedia answer
-func isMovie(msg *tgbotapi.Message, u *state.User, c *cache.Cache, s *state.State) (string, error) {
-	if !canProceed(msg.Text) {
-		s.SetStage(u.ID, "is-movie")
-		return "OK, let's try again. Please tell me the name of the show / movie you'd like to request", nil
-	}
-
-	s.SetStage(u.ID, "create-media-confirm")
-
-	return `
-Is this a movie?
 	`, nil
 }
 
@@ -103,12 +60,4 @@ func sourcePrecheck(msg *tgbotapi.Message, u *state.User, c *cache.Cache, s *sta
 	
 Let me know if I can create another request sometime.
 `, nil
-}
-
-func register() {
-	registerFunc(stageInit, "init")
-	registerFunc(createMedia, "create-media")
-	registerFunc(isMovie, "is-movie")
-	registerFunc(createMediaConfirm, "create-media-confirm")
-	registerFunc(sourcePrecheck, "source-precheck")
 }
