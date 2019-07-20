@@ -3,7 +3,7 @@ GO         ?= go
 PKG        := dep ensure -v
 LDFLAGS    := -w -s
 GOFLAGS    :=
-TAGS       := linux libsqlite3
+TAGS       := 
 GCCGOGLAGS := -fgo-optimize-allocs -O3 -march=native
 CFLAGS     := -fgo-optimize-allocs -O3 -march=native
 BINDIR     := $(CURDIR)/bin
@@ -19,15 +19,10 @@ dep:
 	@echo " ===> Installing dependencies via '$$(echo $(PKG) | awk '{ print $$1 }')' <=== "
 	@$(PKG)
 
-.PHONY: lint
-lint:
-	@echo " ===> running linter ... <=== "
-	@revive -config default.toml -formatter stylish
-
 .PHONY: build
-build: lint
+build:
 	@echo " ===> building releases in ./bin/... <=== "
-	GOBIN=$(BINDIR) $(GO) install $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' github.com/tritonmedia/ignis/...
+	CGO_ENABLED=1 GOBIN=$(BINDIR) $(GO) install -v $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' github.com/tritonmedia/ignis/...
 
 .PHONY: release
 release: lint build
@@ -48,3 +43,6 @@ checksum:
 .PHONY: clean
 clean:
 	@rm -rf $(BINDIR)
+	@echo Going to delete db, giving you 5s to ^C
+	@sleep 5
+	@rm ignis.db

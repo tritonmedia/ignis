@@ -9,7 +9,6 @@ import (
 	"github.com/tritonmedia/ignis/pkg/analysis"
 	"github.com/tritonmedia/ignis/pkg/config"
 	"github.com/tritonmedia/ignis/pkg/telegram"
-	"github.com/tritonmedia/ignis/pkg/trello"
 	"github.com/urfave/cli"
 )
 
@@ -38,8 +37,6 @@ func main() {
 			}
 			return err
 		}
-
-		trello.Init(config.Trello.AppKey, config.Trello.Token, config.Trello.IDList)
 
 		if config.Telegram.Token == "" {
 			fmt.Println("Missing Telegram token in config.")

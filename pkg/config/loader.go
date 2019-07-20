@@ -12,11 +12,6 @@ type Config struct {
 	Telegram struct {
 		Token string `yaml:"token"`
 	} `yaml:"telegram"`
-	Trello struct {
-		AppKey string `yaml:"appKey"`
-		IDList string `yaml:"list"`
-		Token  string `yaml:"token"`
-	} `yaml:"trello"`
 }
 
 // Load a config from path

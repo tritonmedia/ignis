@@ -6,12 +6,14 @@ import (
 	"path/filepath"
 
 	"github.com/tritonmedia/ignis/pkg/config"
+	router "github.com/tritonmedia/ignis/pkg/router"
 	"github.com/tritonmedia/ignis/pkg/state"
 	tgbotapi "gopkg.in/telegram-bot-api.v4"
 )
 
 // NewListener starts a new listener.
 func NewListener(config *config.Config) error {
+	userScenes = make(map[string]map[int]*router.Scene)
 	bot, err := tgbotapi.NewBotAPI(config.Telegram.Token)
 	if err != nil {
 		return err
@@ -81,7 +83,7 @@ func NewListener(config *config.Config) error {
 
 		log.Printf("[processor] DEBU: message: '%s'", update.Message.Text)
 
-		resp, err := processMessage(update.Message, s, user)
+		_, err = processMessage(update.Message, user, bot)
 		if err != nil {
 			log.Printf("[processor] ERR: failed to respond to %s (err: %s)", update.Message.Text, err.Error())
 
@@ -90,11 +92,6 @@ func NewListener(config *config.Config) error {
 
 			bot.Send(m)
 			continue
-		}
-
-		_, err = bot.Send(resp)
-		if err != nil {
-			log.Printf("[send] ERR: failed to send response (err: %s)", err.Error())
 		}
 	}
 

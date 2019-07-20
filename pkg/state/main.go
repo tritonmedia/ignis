@@ -48,6 +48,8 @@ func NewClient(path string) (*State, error) {
 			log.Printf("Failed to initialize SQLite database: %q: %s\n", err, initStmt)
 			return nil, err
 		}
+
+		log.Print("initialized db")
 	}
 
 	var state State

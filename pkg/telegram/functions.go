@@ -8,8 +8,7 @@ import (
 	cache "github.com/patrickmn/go-cache"
 	"github.com/tritonmedia/ignis/pkg/analysis"
 	"github.com/tritonmedia/ignis/pkg/state"
-	"github.com/tritonmedia/ignis/pkg/trello"
-	"gopkg.in/telegram-bot-api.v4"
+	tgbotapi "gopkg.in/telegram-bot-api.v4"
 )
 
 // canProceed determines if we have a positive go-ahead or negative go-ahead
@@ -26,12 +25,12 @@ func stageInit(msg *tgbotapi.Message, u *state.User, c *cache.Cache, s *state.St
 	return `
 Hello, [@{{.User.Username}}](tg://user?id={{.User.ID}})!
 
-You can talk to me to create media request cards on the Triton Media platform.
-The board is located at https://trello.com/b/vIGH0IiL/media-board.
+You can talk to me to interface with the Triton Media platform (https://github.com/tritonmedia/triton).
 
-To create a card, start by telling me the name of the media you'd like to request:
-
-	_KonoSuba_
+Here are the various commands I support:
+	
+	/new - create a new media
+	/list [status] - list all media that is currently on the server
 	`, nil
 }
 
@@ -96,19 +95,11 @@ func sourcePrecheck(msg *tgbotapi.Message, u *state.User, c *cache.Cache, s *sta
 
 	log.Printf("[telegram/functions:sourcePrecheck] create: title=%s,source=%s,isMovie=%s", title, "", strconv.FormatBool(isMovie))
 
-	link, err := trello.CreateCard(title, "", isMovie)
-	if err != nil {
-		log.Printf("[telegram/functions:sourcePrecheck] failed to create card: %s", err.Error())
-		return `
-I'm sorry, I failed to create the card. Please try again later!
-		`, nil
-	}
-
 	if !canProceed(msg.Text) {
-		return `OK! I've went ahead and created the request. Here is it's link: ` + link, nil
+		return `OK! I've went ahead and created the request. Here is it's link: `, nil
 	}
 
-	return `Sorry, I don't support adding URLs yet. But I've created the request, here's the link: ` + link + `
+	return `Sorry, I don't support adding URLs yet. But I've created the request, here's the link: ` + `
 	
 Let me know if I can create another request sometime.
 `, nil
