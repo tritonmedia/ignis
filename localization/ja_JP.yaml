@@ -8,6 +8,8 @@ strings:
   ISMOVIE_GET_TYPE: "これは映画ですか？"
   CONFIRM_MEDIA_ASK: "メディアの 「{{.name}}」タイプ \"{{.type}}\"を要求してください。 持続する？"
   CONFIRM_MEDIA_LEAVE: "メディアを作成しよう！"
+  LIST_HEADER: "メディア"
+  LIST_EMPTY: "メディアが見つかりません"
 proceed:
   no:
   - "いいえ"

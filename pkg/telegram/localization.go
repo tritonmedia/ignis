@@ -21,6 +21,8 @@ type LocalizationFile struct {
 		ISMOVIEGETTYPE    string `yaml:"ISMOVIE_GET_TYPE"`
 		CONFIRMMEDIAASK   string `yaml:"CONFIRM_MEDIA_ASK"`
 		CONFIRMMEDIALEAVE string `yaml:"CONFIRM_MEDIA_LEAVE"`
+		LISTHEADER        string `yaml:"LIST_HEADER"`
+		LISTEMPTY         string `yaml:"LIST_EMPTY"`
 	} `yaml:"strings"`
 	Proceed struct {
 		No  []string `yaml:"no"`

@@ -16,7 +16,7 @@ You can talk to me to interface with the Triton Media platform (https://github.c
 Here are the various commands I support:
 	
 	/new - create a new media
-	/list [status] - list all media that is currently on the server
+	/list - list all media that is currently on the server
 	`,
 		s.Message.GetID(),
 	)

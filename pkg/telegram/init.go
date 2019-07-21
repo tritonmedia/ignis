@@ -69,6 +69,7 @@ func NewListener(config *config.Config, localeName string) error {
 	c := router.NewCommandRouter()
 	c.AddScene("new", newNewScene)
 	c.AddScene("start", newStartScene)
+	c.AddScene("list", newListScene)
 
 	for update := range updates {
 		if update.Message == nil {
