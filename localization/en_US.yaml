@@ -8,7 +8,7 @@ strings:
   ISMOVIE_GET_TYPE: "Is this media file a movie?"
   CONFIRM_MEDIA_ASK: "Going to create a request for the media '{{ .name }}' type '{{ .type }}'. Does this sound OK?"
   CONFIRM_MEDIA_LEAVE: "Creating media request ..."
-  LIST_HEADER: "Media Files"
+  LIST_HEADER: "Media Files (Type/Status)"
   LIST_EMPTY: "No media files found"
 proceed:
   no:

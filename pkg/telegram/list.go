@@ -1,7 +1,9 @@
 package telegram
 
 import (
+	"bytes"
 	"fmt"
+	"strings"
 
 	router "github.com/tritonmedia/ignis/pkg/router"
 )
@@ -12,23 +14,30 @@ func listStageFn(s *router.Scene) error {
 		return fmt.Errorf("failed to list media: %v", err)
 	}
 
-	resp := "🎬 " + locale.Strings.LISTHEADER + "\n"
+	var b bytes.Buffer
+
+	fmt.Fprintln(&b, "🎬 "+locale.Strings.LISTHEADER)
 	for i, media := range m {
 		prefix := "├"
 		if i+1 == len(m) {
 			prefix = "└"
 		}
 
-		str := fmt.Sprintf("%s *%s* (Status %s)\n", prefix, media.Name, media.Status.String())
-		resp += str
+		st := strings.Title(strings.ToLower(media.Status.String()))
+		ty := strings.Title(strings.ToLower(media.Type.String()))
+		if ty == "Tv" {
+			// HACK
+			ty = "TV"
+		}
+		fmt.Fprintf(&b, "%s *%s*  (Type: %s / Status: %s)\n", prefix, media.Name, ty, st)
 	}
 
 	if len(m) == 0 {
-		resp += locale.Strings.LISTEMPTY
+		fmt.Fprintln(&b, locale.Strings.LISTEMPTY)
 	}
 
 	s.Done()
-	return s.Message.Send(resp, s.Message.GetID())
+	return s.Message.Send(b.String(), s.Message.GetID())
 }
 
 func listStage() *router.Stage {
