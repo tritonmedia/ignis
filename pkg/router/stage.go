@@ -22,13 +22,14 @@ type Stage struct {
 type StageFunc func(*Scene) error
 
 // StageTransitionFunc is a func used for Leave/Enter events.
-type StageTransitionFunc func(*Scene) error
+// if true is returned then the transition to the next scene is bailed out.
+type StageTransitionFunc func(*Scene) (bool, error)
 
 // NewStage returns a stage instance that is able to be used in a stage
 func NewStage(name string, f StageFunc) (*Stage, error) {
 	// empty handler
-	generic := func(s *Scene) error {
-		return nil
+	generic := func(s *Scene) (bool, error) {
+		return false, nil
 	}
 
 	if name == "" {

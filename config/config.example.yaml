@@ -1,5 +1,5 @@
 version: 1
 telegram:
   token: YOUR_TELEGRAM_TOKEN
-trello:
-  token: YOUR_TRELLO_TOKEN
+triton:
+  token: YOUR_API_TOKEN

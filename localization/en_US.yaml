@@ -1,0 +1,19 @@
+version: 1
+strings:
+  GENERAL_ABORT: "Aborting."
+  GETMEDIA_GET_NAME: "What is the name of the media you'd like to request?"
+  DUPLICATES_HEADER: "Found the following similar media files:"
+  DUPLICATES_FOOTER: "Are any of these the media you want?"
+  DUPLICATES_CANCEL: "Ok! I've gone ahead and scrapped the creation. Have a nice day!"
+  ISMOVIE_GET_TYPE: "Is this media file a movie?"
+  CONFIRM_MEDIA_ASK: "Going to create a request for the media '{{ .name }}' type '{{ .type }}'. Does this sound OK?"
+  CONFIRM_MEDIA_LEAVE: "Creating media request ..."
+proceed:
+  no:
+  - "no"
+  - "cancel"
+  - "stop"
+  yes:
+  - "yes"
+  - "sure"
+  - "ok"

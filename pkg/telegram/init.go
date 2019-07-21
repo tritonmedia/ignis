@@ -9,11 +9,15 @@ import (
 	"github.com/tritonmedia/ignis/pkg/config"
 	router "github.com/tritonmedia/ignis/pkg/router"
 	"github.com/tritonmedia/ignis/pkg/state"
+	triton "github.com/tritonmedia/tritonmedia.go"
 	tgbotapi "gopkg.in/telegram-bot-api.v4"
 )
 
+var tr *triton.Client
+var locale *LocalizationFile
+
 // NewListener starts a new listener.
-func NewListener(config *config.Config) error {
+func NewListener(config *config.Config, localeName string) error {
 	bot, err := tgbotapi.NewBotAPI(config.Telegram.Token)
 	if err != nil {
 		return err
@@ -47,6 +51,19 @@ func NewListener(config *config.Config) error {
 			log.Printf("[telegram/init] reset stage: oldStage=%s,stage=init,username=%s,uid=%d", user.Stage, user.Username, user.ID)
 		}
 	}
+
+	tr, err = triton.NewClient(config.Triton.Host, config.Triton.Token)
+	if err != nil {
+		return fmt.Errorf("failed to create triton client: %v", err)
+	}
+	log.Printf("[triton/init] client created")
+
+	locale, err = LoadLocale(localeName)
+	if err != nil {
+		return fmt.Errorf("failed to load locale '%s': %v", localeName, err)
+	}
+
+	log.Printf("[localization/init] loaded locale '%s'", localeName)
 
 	// create a command router
 	c := router.NewCommandRouter()
@@ -87,7 +104,7 @@ func NewListener(config *config.Config) error {
 		if err != nil {
 			log.Printf("[processor] ERR: failed to respond to %s (err: %s)", update.Message.Text, err.Error())
 
-			m := tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("Failed to process message: %v", err))
+			m := tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("Message processing failed: %v", err))
 			m.ReplyToMessageID = update.Message.MessageID
 
 			bot.Send(m)

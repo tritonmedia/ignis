@@ -12,6 +12,10 @@ type Config struct {
 	Telegram struct {
 		Token string `yaml:"token"`
 	} `yaml:"telegram"`
+	Triton struct {
+		Host  string `yaml:"host"`
+		Token string `yaml:"token"`
+	} `yaml:"triton"`
 }
 
 // Load a config from path

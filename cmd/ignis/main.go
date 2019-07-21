@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/tritonmedia/ignis/pkg/analysis"
 	"github.com/tritonmedia/ignis/pkg/config"
 	"github.com/tritonmedia/ignis/pkg/telegram"
 	"github.com/urfave/cli"
@@ -15,18 +14,19 @@ import (
 func main() {
 	app := cli.NewApp()
 	app.Name = "ignis"
-	app.Usage = "start the ignis server"
+	app.Usage = "start the ignis chat bot"
 	app.Author = "Jared Allard <jaredallard@outlook.com>"
+	app.Flags = []cli.Flag{
+		cli.StringFlag{
+			Name:  "locale",
+			Usage: "--locale en_US",
+			Value: "en_US",
+		},
+	}
 	app.Action = func(c *cli.Context) error {
 		d, err := os.Getwd()
 		if err != nil {
 			return err
-		}
-
-		err = analysis.Train()
-		if err != nil {
-			log.Printf("[main/analysis:train] failed to train model")
-			os.Exit(1)
 		}
 
 		config, err := config.Load(filepath.Join(d, "config/config.yaml"))
@@ -43,9 +43,7 @@ func main() {
 			os.Exit(1)
 		}
 
-		telegram.NewListener(config)
-
-		return nil
+		return telegram.NewListener(config, c.String("locale"))
 	}
 
 	err := app.Run(os.Args)
